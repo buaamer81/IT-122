@@ -1,0 +1,20 @@
+<!-- views/detail.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= item.title %></title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1><%= item.title %></h1>
+    <div class="container">
+        <p><strong>Artist:</strong> <%= item.artist %></p>
+        <p><strong>Year:</strong> <%= item.year %></p>
+        <p><strong>Genre:</strong> <%= item.genre %></p>
+        <a href="/">Back to Home</a>
+    </div>
+</body>
+</html>
