@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Albums</h1>
+    <div class="container">
+        <ul>
+            <% if (albums && albums.length > 0) { %>
+                <% albums.forEach(album => { %>
+                    <li>
+                        <a href="/detail?id=<%= album._id %>"><%= album.title %></a>
+                    </li>
+                <% }); %>
+            <% } else { %>
+                <li>No albums found</li>
+            <% } %>
+        </ul>
+    </div>
+</body>
+</html>
