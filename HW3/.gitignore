@@ -1,5 +1,5 @@
 # ignore npm packages
 node_modules
-mongodb.js
+config.js
 .idea/
 .DS_Store
