@@ -17,7 +17,7 @@ app.use('/api', cors()); // set Access-Control-Allow-Origin header for api route
 app.get('/', async (req, res, next) => {
   try {
     const albums = await Album.find({}).lean();
-    res.render('home', { albums }); // Pass albums to the template
+    res.render('home', { items: JSON.stringify(albums) }); // Pass albums to the template
   } catch (err) {
     next(err); // Handle errors appropriately
   }
@@ -117,3 +117,4 @@ app.use((req, res) => {
 app.listen(app.get('port'), () => {
   console.log('Express started on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
 });
+
