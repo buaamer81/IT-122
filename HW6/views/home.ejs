@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="stylesheet" href="/styles.css">
+  <!-- Add React and Babel -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+  <h1>Albums</h1>
+  <div id="app" class="container"></div>
+
+  <!-- Pass items data to the template as a JSON string -->
+  <script type="text/babel">
+    // Create variable with unescaped JS data from server
+    let items = <%- items %>;
+
+    // React component for the album list
+    class AlbumList extends React.Component {
+      render() {
+        const { albums, onAlbumClick } = this.props;
+        return (
+          <ul>
+            {Array.isArray(albums) && albums.length > 0 ? (
+              albums.map(album => (
+                <li key={album._id}>
+                  <a href="#" onClick={() => onAlbumClick(album)}>{album.title}</a>
+                </li>
+              ))
+            ) : (
+              <li>No albums found</li>
+            )}
+          </ul>
+        );
+      }
+    }
+
+    // React component for the album details
+    class Detail extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { album: props.album };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.clearForm = this.clearForm.bind(this);
+      }
+
+      handleChange(event) {
+        const { name, value } = event.target;
+        this.setState(prevState => ({
+          album: {
+            ...prevState.album,
+            [name]: value
+          }
+        }));
+      }
+
+      clearForm() {
+        this.setState({ album: null });
+        this.props.onClear();
+      }
+
+      render() {
+        const { album } = this.state;
+
+        if (!album) {
+          return null;
+        }
+
+        return (
+          <div>
+            <h2>{album.title}</h2>
+            <form>
+              <div>
+                <label>Title:</label>
+                <input type="text" name="title" value={album.title} onChange={this.handleChange} />
+              </div>
+              <div>
+                <label>Artist:</label>
+                <input type="text" name="artist" value={album.artist} onChange={this.handleChange} />
+              </div>
+              <div>
+                <label>Year:</label>
+                <input type="number" name="year" value={album.year} onChange={this.handleChange} />
+              </div>
+              <div>
+                <label>Genre:</label>
+                <input type="text" name="genre" value={album.genre} onChange={this.handleChange} />
+              </div>
+              <button type="button" onClick={this.clearForm}>Clear</button>
+            </form>
+          </div>
+        );
+      }
+    }
+
+    // React component for the main application
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = { albums: items, selectedAlbum: null };
+
+        this.handleAlbumClick = this.handleAlbumClick.bind(this);
+        this.handleClear = this.handleClear.bind(this);
+      }
+
+      handleAlbumClick(album) {
+        this.setState({ selectedAlbum: album });
+      }
+
+      handleClear() {
+        this.setState({ selectedAlbum: null });
+      }
+
+      render() {
+        const { albums, selectedAlbum } = this.state;
+        return (
+          <div>
+            <AlbumList albums={albums} onAlbumClick={this.handleAlbumClick} />
+            {selectedAlbum && (
+              <Detail album={selectedAlbum} onClear={this.handleClear} />
+            )}
+          </div>
+        );
+      }
+    }
+
+    // Render the App component
+    ReactDOM.render(<App />, document.getElementById('app'));
+  </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+//APP/index.js
 import express from 'express';
 import Album from './models/album.js'; // Adjust the path if necessary
 import mongoose from './mongodb.js'; // Adjust the path if necessary

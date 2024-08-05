@@ -1,4 +1,4 @@
-// APP/mongodb.js
+// mongodb.js
 import mongoose from 'mongoose';
 import { dbConfig } from './config.js';
 
