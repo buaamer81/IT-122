@@ -17,117 +17,98 @@
   <!-- Pass items data to the template as a JSON string -->
   <script type="text/babel">
     // Create variable with unescaped JS data from server
-    let items = <%- items %>;
+    const items = <%- items %>;
 
-    // React component for the album list
-    class AlbumList extends React.Component {
-      render() {
-        const { albums, onAlbumClick } = this.props;
-        return (
-          <ul>
-            {Array.isArray(albums) && albums.length > 0 ? (
-              albums.map(album => (
-                <li key={album._id}>
-                  <a href="#" onClick={() => onAlbumClick(album)}>{album.title}</a>
-                </li>
-              ))
-            ) : (
-              <li>No albums found</li>
-            )}
-          </ul>
-        );
-      }
-    }
+    // Functional component for the album list
+    const AlbumList = ({ albums, onAlbumClick }) => {
+      return (
+        <ul>
+          {Array.isArray(albums) && albums.length > 0 ? (
+            albums.map(album => (
+              <li key={album._id}>
+                <a href="#" onClick={() => onAlbumClick(album)}>{album.title}</a>
+              </li>
+            ))
+          ) : (
+            <li>No albums found</li>
+          )}
+        </ul>
+      );
+    };
 
-    // React component for the album details
-    class Detail extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = { album: props.album };
+    // Functional component for the album details
+    const Detail = ({ album, onClear }) => {
+      const [currentAlbum, setCurrentAlbum] = React.useState(album);
 
-        this.handleChange = this.handleChange.bind(this);
-        this.clearForm = this.clearForm.bind(this);
-      }
+      React.useEffect(() => {
+        setCurrentAlbum(album);
+      }, [album]);
 
-      handleChange(event) {
+      const handleChange = (event) => {
         const { name, value } = event.target;
-        this.setState(prevState => ({
-          album: {
-            ...prevState.album,
-            [name]: value
-          }
+        setCurrentAlbum(prevAlbum => ({
+          ...prevAlbum,
+          [name]: value
         }));
+      };
+
+      const clearForm = () => {
+        setCurrentAlbum(null);
+        onClear();
+      };
+
+      if (!currentAlbum) {
+        return null;
       }
 
-      clearForm() {
-        this.setState({ album: null });
-        this.props.onClear();
-      }
+      return (
+        <div>
+          <h2>{currentAlbum.title}</h2>
+          <form>
+            <div>
+              <label>Title:</label>
+              <input type="text" name="title" value={currentAlbum.title} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Artist:</label>
+              <input type="text" name="artist" value={currentAlbum.artist} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Year:</label>
+              <input type="number" name="year" value={currentAlbum.year} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Genre:</label>
+              <input type="text" name="genre" value={currentAlbum.genre} onChange={handleChange} />
+            </div>
+            <button type="button" onClick={clearForm}>Clear</button>
+          </form>
+        </div>
+      );
+    };
 
-      render() {
-        const { album } = this.state;
+    // Functional component for the main application
+    const App = () => {
+      const [albums, setAlbums] = React.useState(items);
+      const [selectedAlbum, setSelectedAlbum] = React.useState(null);
 
-        if (!album) {
-          return null;
-        }
+      const handleAlbumClick = (album) => {
+        setSelectedAlbum(album);
+      };
 
-        return (
-          <div>
-            <h2>{album.title}</h2>
-            <form>
-              <div>
-                <label>Title:</label>
-                <input type="text" name="title" value={album.title} onChange={this.handleChange} />
-              </div>
-              <div>
-                <label>Artist:</label>
-                <input type="text" name="artist" value={album.artist} onChange={this.handleChange} />
-              </div>
-              <div>
-                <label>Year:</label>
-                <input type="number" name="year" value={album.year} onChange={this.handleChange} />
-              </div>
-              <div>
-                <label>Genre:</label>
-                <input type="text" name="genre" value={album.genre} onChange={this.handleChange} />
-              </div>
-              <button type="button" onClick={this.clearForm}>Clear</button>
-            </form>
-          </div>
-        );
-      }
-    }
+      const handleClear = () => {
+        setSelectedAlbum(null);
+      };
 
-    // React component for the main application
-    class App extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = { albums: items, selectedAlbum: null };
-
-        this.handleAlbumClick = this.handleAlbumClick.bind(this);
-        this.handleClear = this.handleClear.bind(this);
-      }
-
-      handleAlbumClick(album) {
-        this.setState({ selectedAlbum: album });
-      }
-
-      handleClear() {
-        this.setState({ selectedAlbum: null });
-      }
-
-      render() {
-        const { albums, selectedAlbum } = this.state;
-        return (
-          <div>
-            <AlbumList albums={albums} onAlbumClick={this.handleAlbumClick} />
-            {selectedAlbum && (
-              <Detail album={selectedAlbum} onClear={this.handleClear} />
-            )}
-          </div>
-        );
-      }
-    }
+      return (
+        <div>
+          <AlbumList albums={albums} onAlbumClick={handleAlbumClick} />
+          {selectedAlbum && (
+            <Detail album={selectedAlbum} onClear={handleClear} />
+          )}
+        </div>
+      );
+    };
 
     // Render the App component
     ReactDOM.render(<App />, document.getElementById('app'));
