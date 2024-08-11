@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Album Details</title>
+  <link rel="stylesheet" href="/styles.css">
+  <!-- Add React and Babel -->
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+  <h1>Album Details</h1>
+  <div id="app"></div>
+
+  <!-- Pass album data to the template as a JSON string -->
+  <script type="text/babel">
+    const album = <%- JSON.stringify(album) %>;
+
+    // Functional component for the album details
+    const Detail = ({ album, onClear, onSave, onDelete }) => {
+      const [currentAlbum, setCurrentAlbum] = React.useState(album || {
+        title: '',
+        artist: '',
+        year: '',
+        genre: ''
+      });
+
+      React.useEffect(() => {
+        setCurrentAlbum(album || {
+          title: '',
+          artist: '',
+          year: '',
+          genre: ''
+        });
+      }, [album]);
+
+      const handleChange = (event) => {
+        const { name, value } = event.target;
+        setCurrentAlbum(prevAlbum => ({
+          ...prevAlbum,
+          [name]: value
+        }));
+      };
+
+      const clearForm = () => {
+        setCurrentAlbum({
+          title: '',
+          artist: '',
+          year: '',
+          genre: ''
+        });
+        onClear();
+      };
+
+      const saveAlbum = () => {
+        onSave(currentAlbum);
+      };
+
+      const deleteAlbum = () => {
+        if (currentAlbum && currentAlbum._id) {
+          onDelete(currentAlbum._id);
+        }
+      };
+
+      if (!currentAlbum) {
+        return null;
+      }
+
+      return (
+        <div>
+          <h2>{currentAlbum._id ? currentAlbum.title : 'New Album'}</h2>
+          <form>
+            <div>
+              <label>Title:</label>
+              <input type="text" name="title" value={currentAlbum.title} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Artist:</label>
+              <input type="text" name="artist" value={currentAlbum.artist} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Year:</label>
+              <input type="number" name="year" value={currentAlbum.year} onChange={handleChange} />
+            </div>
+            <div>
+              <label>Genre:</label>
+              <input type="text" name="genre" value={currentAlbum.genre} onChange={handleChange} />
+            </div>
+            <button type="button" onClick={saveAlbum}>Save</button>
+            {currentAlbum._id && <button type="button" onClick={deleteAlbum}>Delete</button>}
+            <button type="button" onClick={clearForm}>Clear</button>
+          </form>
+        </div>
+      );
+    };
+
+    const handleSave = (album) => {
+      const method = album._id ? 'PUT' : 'POST';
+      fetch(`/api/albums${album._id ? `/${album._id}` : ''}`, {
+        method: method,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(album)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!album._id) {
+          // Handle new album addition
+          window.location.href = '/'; // Redirect to home after saving
+        } else {
+          // Handle album update
+          window.location.reload(); // Reload page after updating
+        }
+      })
+      .catch(error => console.error('Error saving album:', error));
+    };
+
+    const handleDelete = (albumId) => {
+      fetch(`/api/albums/${albumId}`, {
+        method: 'DELETE'
+      })
+      .then(response => response.json())
+      .then(() => {
+        window.location.href = '/'; // Redirect to home after deletion
+      })
+      .catch(error => console.error('Error deleting album:', error));
+    };
+
+    ReactDOM.render(<Detail album={album} onSave={handleSave} onDelete={handleDelete} onClear={() => window.location.href = '/'} />, document.getElementById('app'));
+  </script>
+</body>
+</html>
